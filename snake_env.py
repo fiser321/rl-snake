@@ -1,8 +1,7 @@
-
-
+import numpy as np
 import random, pygame, sys
 from pygame.locals import *
-FPS = 100
+FPS = 5
 ##WINDOWWIDTH = 640
 #WINDOWHEIGHT = 480
 WINDOWWIDTH = 640
@@ -25,6 +24,7 @@ UP = 'up'
 DOWN = 'down'
 LEFT = 'left'
 RIGHT = 'right'
+ACTIONS = [UP, DOWN, LEFT, RIGHT]
 HEAD = 0 # syntactic sugar: index of the worm's head
 #global FPSCLOCK, DISPLAYSURF, BASICFONT
 pygame.init()
@@ -125,7 +125,7 @@ def drawGrid():
     for y in range(0, WINDOWHEIGHT, CELLSIZE): # draw horizontal lines
         pygame.draw.line(DISPLAYSURF, DARKGRAY, (0, y), (WINDOWWIDTH, y))
 
-class Env(object):
+class GameEnv(object):
     def reset(self):
         self.startx = random.randint(5, CELLWIDTH - 6)
         self.starty = random.randint(5, CELLHEIGHT - 6)
@@ -135,25 +135,39 @@ class Env(object):
                            {'x': self.startx - 2, 'y': self.starty}]
         self.direction = RIGHT
         self.apple = getRandomLocation(self.wormCoords)
+
     def step(self, action):
+        reward = 0.1
+        terminal = False
+        action = ACTIONS[np.argmax(action)]
         self.pre_direction = self.direction
-        if (action == "left") and self.direction != "right":
+        if (action == "left") and self.direction != RIGHT:
             self.direction = LEFT
-        elif (action == "right") and self.direction != "left":
+        elif (action == "right") and self.direction != LEFT:
             self.direction = RIGHT
-        elif (action == "up") and self.direction != "down":
+        elif (action == "up") and self.direction != DOWN:
             self.direction = UP
-        elif (action == "down") and self.direction != "up":
+        elif (action == "down") and self.direction != UP:
             self.direction = DOWN
         if self.wormCoords[HEAD]['x'] == -1 or self.wormCoords[HEAD]['x'] == CELLWIDTH or self.wormCoords[HEAD][
             'y'] == -1 or self.wormCoords[HEAD]['y'] == CELLHEIGHT:
-            return True  # game over
+            reward = -1
+            terminal = True
+            self.reset()
+            image_data = self.render()
+            return image_data, reward, terminal
+
         for wormBody in self.wormCoords[1:]:
             if wormBody['x'] == self.wormCoords[HEAD]['x'] and wormBody['y'] == self.wormCoords[HEAD]['y']:
-                return True  # game over
+                reward = -1
+                terminal = True
+                self.reset()
+                image_data = self.render()
+                return image_data, reward, terminal
         # check if worm has eaten an apply
         if self.wormCoords[HEAD]['x'] == self.apple['x'] and self.wormCoords[HEAD]['y'] == self.apple['y']:
             # don't remove worm's tail segment
+            reward = 1
             self.apple = getRandomLocation(self.wormCoords)  # set a new apple somewhere
         else:
             del self.wormCoords[-1]  # remove worm's tail segment
@@ -169,7 +183,9 @@ class Env(object):
         elif self.direction == RIGHT:
             newHead = {'x': self.wormCoords[HEAD]['x'] + 1, 'y': self.wormCoords[HEAD]['y']}
         self.wormCoords.insert(0, newHead)
-        return False
+        image_data = self.render()
+        return image_data, reward, terminal
+
     def render(self):
         DISPLAYSURF.fill(BGCOLOR)
         drawGrid()
@@ -178,20 +194,28 @@ class Env(object):
         drawScore(len(self.wormCoords) - 3)
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+        image_data = pygame.surfarray.array3d(pygame.display.get_surface())
+        #print(image_data[100][1],image_data.shape, "------")
+        #image_data = ""
+        return image_data
 
 def main_ai():
-    obj = Env()
+    obj = GameEnv()
     actions = ["down", "up", "right", "left"]
-    for i in range(1000):
-        obj.reset()
+    obj.reset()
+    for i in range(10):
         done = False
         while True:
-            obj.render()
-            action = random.choice(actions)
+            #obj.render()
+            do_nothing = np.zeros(4)
+            index = random.choice(range(4))
+            do_nothing[index] = 1
             # observation_, reward, done = obj.step(action)
-            done = obj.step(action)
+            states, reward, done = obj.step(do_nothing)
             if done:
                 break
+    pygame.quit()
+    sys.exit()
 
 if __name__ == '__main__':
     main_ai()

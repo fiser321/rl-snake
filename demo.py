@@ -1,5 +1,4 @@
 
-
 import random, pygame, sys
 from pygame.locals import *
 
@@ -32,7 +31,6 @@ HEAD = 0 # syntactic sugar: index of the worm's head
 
 def main():
     global FPSCLOCK, DISPLAYSURF, BASICFONT
-
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
@@ -53,7 +51,6 @@ def runGame():
                   {'x': startx - 1, 'y': starty},
                   {'x': startx - 2, 'y': starty}]
     direction = RIGHT
-
     # Start the apple in a random place.
     apple = getRandomLocation(wormCoords)
 
