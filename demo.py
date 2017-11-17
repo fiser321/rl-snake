@@ -1,7 +1,5 @@
-
 import random, pygame, sys
 from pygame.locals import *
-
 FPS = 15
 ##WINDOWWIDTH = 640
 #WINDOWHEIGHT = 480
@@ -137,7 +135,6 @@ def checkForKeyPress():
         terminate()
     return keyUpEvents[0].key
 
-
 def showStartScreen():
     titleFont = pygame.font.Font('freesansbold.ttf', 100)
     titleSurf1 = titleFont.render('Snaky!', True, WHITE, DARKGREEN)
@@ -171,8 +168,6 @@ def showStartScreen():
 def terminate():
     pygame.quit()
     sys.exit()
-
-
 
 def getRandomLocation(worm):
     temp = {'x': random.randint(0, CELLWIDTH - 1), 'y': random.randint(0, CELLHEIGHT - 1)}
@@ -221,7 +216,6 @@ def drawWorm(wormCoords):
         wormSegmentRect = pygame.Rect(x, y, CELLSIZE, CELLSIZE)
         pygame.draw.rect(DISPLAYSURF, DARKGREEN, wormSegmentRect)
         wormInnerSegmentRect = pygame.Rect(x + 4, y + 4, CELLSIZE - 8, CELLSIZE - 8)
-
         pygame.draw.rect(DISPLAYSURF, GREEN, wormInnerSegmentRect)
 
 def drawApple(coord):
