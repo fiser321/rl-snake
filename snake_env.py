@@ -203,7 +203,7 @@ def main_ai():
     obj = GameEnv()
     actions = ["down", "up", "right", "left"]
     obj.reset()
-    for i in range(10):
+    for i in range(1000):
         done = False
         while True:
             #obj.render()
